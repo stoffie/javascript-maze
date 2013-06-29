@@ -4,18 +4,22 @@ var org = org || {};
 org.stoffie = org.stoffie || {};
 org.stoffie.maze = org.stoffie.maze || {};
 
-(function() {
+(function () {
+	alert('hello 2');
 	var maze = org.stoffie.maze;
 	maze.CELL_SIZE = 50; // How many pixels is big a cell?
 	maze.DIRECTIONS = ['up','down','left','right'];
+	// A wall is done of concrete.
 	maze.Wall = function () {
 		this.exists = true; // Should the wall be drawn?
-		this.neighbors = []; // The neighbors are 2 cells.
 	}
+	// A cell is surrounded by walls.
 	maze.Cell = function () {
 		this.visited = false; // Has been the cell visited?
-		this.neighbors = {}; // At most 4: up down left right. The neighbors are walls.
+		this.neighbors = {}; // At most 4: up down left right.
+		this.neighbor_walls = {};
 	};
+	// Data structure that keeps track of the cells.
 	maze.Maze = function (rows, columns) {
 		this.complete = false;
 		this.cells = [];
@@ -26,12 +30,21 @@ org.stoffie.maze = org.stoffie.maze || {};
 				this.cells[i][j] = new maze.Cell();
 			}
 		}
+		for (var i = 0; i < rows; i++) {
+			for (var j = 0; j < columns; j++) {
+				var cell = this.cells[i][j];
+				if (i != 0) {
+					var wall = new maze.Wall();
+				}
+			}
+		}
 		this.current_cell = this.cells[0][0];
 	};
-	maze.Maze.prototype.update = function () {
+	maze.Maze.prototype.continue_generation = function () {
 		this.current_cell.visited = true;
 		var direction = MAZE.DIRECTIONS[Math.floor(Math.random() * 4)];
 	};
+	// Canvas used for drawing over the screen.
 	maze.Canvas = function (element) {
 		this.context_2d = element.getContext("2d");
 		this.columns = Math.floor(element.width / maze.CELL_SIZE);
@@ -40,8 +53,10 @@ org.stoffie.maze = org.stoffie.maze || {};
 		if (this.rows % 2 == 0) this.rows--;
 		this.x_span = (element.width - maze.CELL_SIZE * this.columns) / 2;
 		this.y_span = (element.height - maze.CELL_SIZE * this.rows) / 2;
+		/*var maze_rows = (this.rows -1)/2;
+		var maze_columns = (this.columns -1)/2;
+		this.structure = new maze.Maze(maze_rows, maze_columns);*/
 	};
-	// Canvas used for drawing over the screen.
 	maze.Canvas.prototype.draw = function () {
 		var ctx = this.context_2d; // Alias.
 		for (var i = 0; i < this.columns; i++) {
@@ -77,5 +92,6 @@ org.stoffie.maze = org.stoffie.maze || {};
 
 			}
 		}*/
-	}
+	};
+	alert('hello');
 })();
