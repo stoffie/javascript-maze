@@ -4,24 +4,31 @@ var org = org || {};
 org.stoffie = org.stoffie || {};
 org.stoffie.maze = org.stoffie.maze || {};
 
-(function () {
-	alert('hello 2');
+//(function () {
+console.log('hi maze.js');
 	var maze = org.stoffie.maze;
 	maze.CELL_SIZE = 50; // How many pixels is big a cell?
 	maze.DIRECTIONS = ['up','down','left','right'];
-	// A wall is done of concrete.
+	/* A wall is done of concrete.
+	 */
 	maze.Wall = function () {
 		this.exists = true; // Should the wall be drawn?
 	}
-	// A cell is surrounded by walls.
+	
+	/* A cell is surrounded by walls.
+	 */
 	maze.Cell = function () {
 		this.visited = false; // Has been the cell visited?
 		this.neighbors = {}; // At most 4: up down left right.
 		this.neighbor_walls = {};
 	};
-	// Data structure that keeps track of the cells.
+	
+	/* Data structure that keeps track of the cells.
+	 */
 	maze.Maze = function (rows, columns) {
 		this.complete = false;
+		this.rows = rows;
+		this.columns = columns;
 		this.cells = [];
 		this.cell_stack = [];
 		for (var i = 0; i < rows; i++) {
@@ -30,21 +37,40 @@ org.stoffie.maze = org.stoffie.maze || {};
 				this.cells[i][j] = new maze.Cell();
 			}
 		}
-		for (var i = 0; i < rows; i++) {
-			for (var j = 0; j < columns; j++) {
-				var cell = this.cells[i][j];
-				if (i != 0) {
-					var wall = new maze.Wall();
-				}
+
+		for (var i = 0; i < this.rows -1; i++) {
+			for (j = 0; j < this.columns; j++) {
+//console.log('vertical wall i:' + i + ' j:' + j);
+				var wall = new maze.Wall();
+				var cell_above = this.cells[i][j];
+				var cell_down = this.cells[i + 1][j];
+				cell_above.neighbors['down'] = cell_down;
+				cell_above.neighbor_walls['down'] = wall;
+				cell_down.neighbors['up'] = cell_above;
+				cell_down.neighbor_walls['up'] = wall;
+			}
+		}
+		for (var i = 0; i < this.rows; i++) {
+			for (j = 0; j < this.columns -1; j++) {
+//console.log('horizontal wall i:' + i + ' j:' + j);
+				var wall = new maze.Wall();
+				var cell_left = this.cells[i][j];
+				var cell_right = this.cells[i][j + 1];
+				cell_left.neighbors['right'] = cell_right;
+				cell_left.neighbor_walls['right'] = wall;
+				cell_right.neighbors['left'] = cell_left;
+				cell_right.neighbor_walls['left'] = wall;
 			}
 		}
 		this.current_cell = this.cells[0][0];
 	};
 	maze.Maze.prototype.continue_generation = function () {
 		this.current_cell.visited = true;
-		var direction = MAZE.DIRECTIONS[Math.floor(Math.random() * 4)];
+		var direction = maze.DIRECTIONS[Math.floor(Math.random() * 4)];
 	};
-	// Canvas used for drawing over the screen.
+	
+	/* Canvas used for drawing over the screen.
+	 */
 	maze.Canvas = function (element) {
 		this.context_2d = element.getContext("2d");
 		this.columns = Math.floor(element.width / maze.CELL_SIZE);
@@ -53,9 +79,12 @@ org.stoffie.maze = org.stoffie.maze || {};
 		if (this.rows % 2 == 0) this.rows--;
 		this.x_span = (element.width - maze.CELL_SIZE * this.columns) / 2;
 		this.y_span = (element.height - maze.CELL_SIZE * this.rows) / 2;
-		/*var maze_rows = (this.rows -1)/2;
-		var maze_columns = (this.columns -1)/2;
-		this.structure = new maze.Maze(maze_rows, maze_columns);*/
+		this.maze_rows = (this.rows -1)/2;
+		this.maze_columns = (this.columns -1)/2;
+		// Is this used?
+		if (this.maze_rows * this.maze_columns > 1)
+console.log('creating the maze structure');
+			this.structure = new maze.Maze(this.maze_rows, this.maze_columns);
 	};
 	maze.Canvas.prototype.draw = function () {
 		var ctx = this.context_2d; // Alias.
@@ -68,30 +97,38 @@ org.stoffie.maze = org.stoffie.maze || {};
 				ctx.fillRect(x, y, maze.CELL_SIZE, maze.CELL_SIZE);
 			}
 		}
-		/*var maze_rows = (rows -1)/2;
-		var maze_columns = (columns -1)/2;
-		maze = new maze.Maze(maze_rows, maze_columns);
-		for (i = 0; i < maze_rows; i++) {
-			for (j = 0; j < maze_columns; j++) {
-				ctx.fillStyle = (maze.cells[i][j].visited ? '#999999' : '#111111');
-				ctx.fillRect(x_span + 50 * i * 2 + 50, y_span + j * 50 * 2 + 50, 50, 50);
+		// Paint the cells.
+		for (i = 0; i < this.maze_rows; i++) {
+			for (j = 0; j < this.maze_columns; j++) {
+				// Note j is used for the x coordinate and i for the y.
+				var x = this.x_span + maze.CELL_SIZE * j * 2 + maze.CELL_SIZE;
+				var y = this.y_span + maze.CELL_SIZE * i * 2 + maze.CELL_SIZE;
+				ctx.fillStyle = (this.structure.cells[i][j].visited ? '#FFFFFF' : '#000000');
+				ctx.fillRect(x, y, maze.CELL_SIZE, maze.CELL_SIZE);
 			}
 		}
-		for (i = 0; i < maze_columns; i++) {
-			for (j = 0; j < maze_rows -1; j++) {
-				ctx.fillStyle = (maze.cells[j][i].wall_down ? '#888888' : '#222222');
-				ctx.fillRect(x_span + 50 * i * 2 + 50,
-					y_span + j * 50 * 2 + 50 * 2, 50, 50);
+		// Paint the horizontal walls.
+		for (i = 0; i < this.maze_rows; i++) {
+			for (j = 0; j < this.maze_columns -1; j++) {
+				var wall = this.structure.cells[i][j].neighbor_walls['right'];
+				// Note j is used for the x coordinate and i for the y.
+				var x = this.x_span + maze.CELL_SIZE * j * 2 + maze.CELL_SIZE * 2;
+				var y = this.y_span + maze.CELL_SIZE * i * 2 + maze.CELL_SIZE;
+				ctx.fillStyle = (wall.exists ? '#000000' : '#FFFFFF');
+				ctx.fillRect(x, y, maze.CELL_SIZE, maze.CELL_SIZE);
 			}
 		}
-		for (i = 0; i < maze_columns -1; i++) {
-			for (j = 0; j < maze_rows; j++) {
-				ctx.fillStyle = (maze.cells[j][i].wall_right ? '#777700' : '#222200');
-				ctx.fillRect(x_span + 50 * i * 2 + 50 * 2,
-					y_span + j * 50 * 2 + 50, 50, 50);
-
+		// Paint the vertical walls.
+		for (i = 0; i < this.maze_rows -1; i++) {
+			for (j = 0; j < this.maze_columns; j++) {
+				var wall = this.structure.cells[i][j].neighbor_walls['down'];
+				// Note j is used for the x coordinate and i for the y.
+				var x = this.x_span + maze.CELL_SIZE * j * 2 + maze.CELL_SIZE;
+				var y = this.y_span + maze.CELL_SIZE * i * 2 + maze.CELL_SIZE * 2;
+				ctx.fillStyle = (wall.exists ? '#000000' : '#FFFFFF');
+				ctx.fillRect(x, y, maze.CELL_SIZE, maze.CELL_SIZE);
 			}
-		}*/
+		}
 	};
-	alert('hello');
-})();
+console.log('goodbye maze.js');
+//})();

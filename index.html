@@ -68,20 +68,20 @@ window.addEventListener('resize', function() {
 	canvas.height = window.innerHeight;
 	draw();
 }, false);*/
-			alert('hello main');
+			console.log('hello main');
 			var canvas = document.getElementById("canvas");
 			canvas.width = window.innerWidth;
 			canvas.height = window.innerHeight;
 			var maze_canvas = new org.stoffie.maze.Canvas(canvas);
 			maze_canvas.draw();
 			window.addEventListener('resize', function() {
+				console.log('resize');
 				canvas.width = window.innerWidth;
 				canvas.height = window.innerHeight;
 				maze_canvas = new org.stoffie.maze.Canvas(canvas);
 				maze_canvas.draw();
 			}, false);
-			alert('hello');
+			console.log('goodbye, program ends');
 		</script>
 	</body>
 </html>
-
