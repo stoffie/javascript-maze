@@ -1,87 +1,33 @@
 <!DOCTYPE html>
 <html>
-		<head></head>
-		<body style="height: 100%; margin: 0;">
-		<style>* { margin: 0; padding: 0;}
-
-				body, html { height:100%; }
-
-				#canvas {
-				    position:absolute;
-			    width:100%;
-		    height:100%;
-	}</style>
-		<canvas id="canvas"></canvas>
+	<head>
+		<style>
+			* { margin: 0; padding: 0;}
+			body, html { height:100%; }
+			#canvas {
+				position:absolute;
+				width:100%;
+				height:100%;
+			}
+		</style>
 		<script src="maze.js"></script>
+	</head>
+	<body>	
+		<canvas id="canvas"></canvas>
 		<script>
-/*var canvas=document.getElementById("canvas");
-var draw=function(){
-	var ctx=canvas.getContext("2d");
-
-	ctx.fillStyle="#00FFFF";
-	ctx.fillRect(0,0,canvas.width/2,canvas.height/2);
-
-	var columns = Math.floor(canvas.width/50);
-	if (columns % 2 == 0) columns--;
-	var x_span = (canvas.width - 50 * columns) / 2;
-	var rows = Math.floor(canvas.height/50);
-	if (rows % 2 == 0) rows--;
-	var y_span = (canvas.height - 50 * rows) / 2;
-
-	for (var i = 0; i < columns; i++) {
-			for (var j = 0; j < rows; j++) {
-			if ((i % 2 == 1 && j % 2 == 0) ||(i % 2 == 0 && j % 2 == 1)) continue;
-		    ctx.fillStyle="#FF0000";
-			ctx.fillRect(x_span + 50 * i,y_span + j * 50,50,50);
-		}
-	}
-	maze_rows = (rows -1)/2;
-	maze_columns = (columns -1)/2;
-	maze = new org.stoffie.maze.Maze(maze_rows, maze_columns);
-	for (i = 0; i < maze_rows; i++) {
-		for (j = 0; j < maze_columns; j++) {
-			ctx.fillStyle = (maze.cells[i][j].visited ? '#999999' : '#111111');
-			ctx.fillRect(x_span + 50 * i * 2 + 50, y_span + j * 50 * 2 + 50, 50, 50);
-		}
-	}
-	for (i = 0; i < maze_columns; i++) {
-		for (j = 0; j < maze_rows -1; j++) {
-			ctx.fillStyle = (maze.cells[j][i].wall_down ? '#888888' : '#222222');
-			ctx.fillRect(x_span + 50 * i * 2 + 50,
-				y_span + j * 50 * 2 + 50 * 2, 50, 50);
-		}
-	}
-	for (i = 0; i < maze_columns -1; i++) {
-		for (j = 0; j < maze_rows; j++) {
-			ctx.fillStyle = (maze.cells[j][i].wall_right ? '#777700' : '#222200');
-			ctx.fillRect(x_span + 50 * i * 2 + 50 * 2,
-				y_span + j * 50 * 2 + 50, 50, 50);
-
-		}
-	}
-}
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-draw();
-window.addEventListener('resize', function() {
-	canvas.width = window.innerWidth;
-	canvas.height = window.innerHeight;
-	draw();
-}, false);*/
-			console.log('hello main');
 			var canvas = document.getElementById("canvas");
 			canvas.width = window.innerWidth;
 			canvas.height = window.innerHeight;
-			var maze_canvas = new org.stoffie.maze.Canvas(canvas);
+			var maze = new org.stoffie.maze.Canvas(canvas);
 			window.addEventListener('resize', function() {
-				console.log('resize');
 				canvas.width = window.innerWidth;
 				canvas.height = window.innerHeight;
-				maze_canvas = new org.stoffie.maze.Canvas(canvas);
-				maze_canvas.draw();
+				maze = new org.stoffie.maze.Canvas(canvas);
 			}, false);
-			setInterval(function () { maze_canvas.draw() }, 1000 / 20);
-			console.log('goodbye, program ends');
+			setInterval(function () {
+				if (!maze.complete)
+					maze.update();
+			}, 1000 / 60);
 		</script>
 	</body>
 </html>
