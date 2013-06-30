@@ -22,6 +22,15 @@ console.log('hi maze.js');
 		this.neighbors = {}; // At most 4: up down left right.
 		this.neighbor_walls = {};
 	};
+	maze.Cell.prototype.unvisited_neighbors = function () {
+		var map = {};
+		for (var key in this.neighbors) {
+			if (!this.neighbors[key].visited) {
+				map[key] = this.neighbors[key];
+			}
+		}
+		return map;
+	}
 	
 	/* Data structure that keeps track of the cells.
 	 */
@@ -63,10 +72,34 @@ console.log('hi maze.js');
 			}
 		}
 		this.current_cell = this.cells[0][0];
+		this.cell_stack.push(this.cells[0][0]);
 	};
 	maze.Maze.prototype.continue_generation = function () {
-		this.current_cell.visited = true;
-		var direction = maze.DIRECTIONS[Math.floor(Math.random() * 4)];
+console.log('continue_generation');
+		var current_cell = this.cell_stack[this.cell_stack.length -1];
+		current_cell.visited = true;
+		while (this.cell_stack.length > 0) {
+			var neighbors = current_cell.unvisited_neighbors();
+			var neighbors_count = 0;
+			var neighbors_list = [];
+			for (var key in neighbors) {
+				neighbors_count++;
+				neighbors_list.push(key);
+			}
+			if (neighbors_count > 0) {
+				// Chose a random neighbor and insert it into the stack.
+				var direction = neighbors_list[Math.floor(Math.random() * neighbors_count)];
+				current_cell.neighbor_walls[direction].exists = false;
+				this.cell_stack.push(current_cell.neighbors[direction]);
+				break;
+			} else {
+				this.cell_stack.pop();
+				current_cell = this.cell_stack[this.cell_stack.length -1];
+			}
+		}
+		if (this.cell_stack.length == 0) {
+			this.complete = true;
+		}
 	};
 	
 	/* Canvas used for drawing over the screen.
@@ -79,24 +112,23 @@ console.log('hi maze.js');
 		if (this.rows % 2 == 0) this.rows--;
 		this.x_span = (element.width - maze.CELL_SIZE * this.columns) / 2;
 		this.y_span = (element.height - maze.CELL_SIZE * this.rows) / 2;
+		this.width = element.width;
+		this.height = element.height;
 		this.maze_rows = (this.rows -1)/2;
 		this.maze_columns = (this.columns -1)/2;
 		// Is this used?
 		if (this.maze_rows * this.maze_columns > 1)
 console.log('creating the maze structure');
 			this.structure = new maze.Maze(this.maze_rows, this.maze_columns);
+			//TEMP
+			while (!this.structure.complete) {
+				this.structure.continue_generation();
+			}
 	};
 	maze.Canvas.prototype.draw = function () {
 		var ctx = this.context_2d; // Alias.
-		for (var i = 0; i < this.columns; i++) {
-			for (var j = 0; j < this.rows; j++) {
-				if ((i % 2 == 1 && j % 2 == 0) ||(i % 2 == 0 && j % 2 == 1)) continue;
-				ctx.fillStyle="#FF0000";
-				var x = this.x_span + maze.CELL_SIZE * i;
-				var y = this.y_span + maze.CELL_SIZE * j;
-				ctx.fillRect(x, y, maze.CELL_SIZE, maze.CELL_SIZE);
-			}
-		}
+		ctx.fillStyle="#000000";
+		ctx.fillRect(0, 0, this.width, this.height);
 		// Paint the cells.
 		for (i = 0; i < this.maze_rows; i++) {
 			for (j = 0; j < this.maze_columns; j++) {
