@@ -75,7 +75,7 @@ console.log('hi maze.js');
 		this.cell_stack.push(this.cells[0][0]);
 	};
 	maze.Maze.prototype.continue_generation = function () {
-console.log('continue_generation');
+//console.log('continue_generation');
 		var current_cell = this.cell_stack[this.cell_stack.length -1];
 		current_cell.visited = true;
 		while (this.cell_stack.length > 0) {
@@ -120,12 +120,10 @@ console.log('continue_generation');
 		if (this.maze_rows * this.maze_columns > 1)
 console.log('creating the maze structure');
 			this.structure = new maze.Maze(this.maze_rows, this.maze_columns);
-			//TEMP
-			while (!this.structure.complete) {
-				this.structure.continue_generation();
-			}
 	};
 	maze.Canvas.prototype.draw = function () {
+		if (!this.structure.complete)
+			this.structure.continue_generation();
 		var ctx = this.context_2d; // Alias.
 		ctx.fillStyle="#000000";
 		ctx.fillRect(0, 0, this.width, this.height);
