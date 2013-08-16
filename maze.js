@@ -7,7 +7,7 @@ org.stoffie.maze = org.stoffie.maze || {};
 (function () {
 
 var maze = org.stoffie.maze;
-maze.CELL_SIZE = 25; // How many pixels is big a cell?
+maze.CELL_SIZE = 10; // How many pixels is big a cell?
 maze.BACKGROUND = '#000000';
 maze.FOREGROUND = '#FFFFFF';
 
@@ -127,6 +127,22 @@ maze.Canvas.prototype.update = function () {
 	}
 	if (this.cell_stack.length == 0)
 		this.complete = true;
+};
+
+maze.Main = function () {
+	var canvas = document.getElementById("canvas");
+	canvas.width = window.innerWidth;
+	canvas.height = window.innerHeight;
+	var maze = new org.stoffie.maze.Canvas(canvas);
+	window.addEventListener('resize', function() {
+		canvas.width = window.innerWidth;
+		canvas.height = window.innerHeight;
+		maze = new org.stoffie.maze.Canvas(canvas);
+	}, false);
+	setInterval(function () {
+		if (!maze.complete)
+			maze.update();
+	}, 1000 / 60);
 };
 
 })();
