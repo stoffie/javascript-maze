@@ -51,8 +51,8 @@ maze.Canvas = function (element, cell_size) {
 	rows = Math.floor(element.height / this.cell_size);
 	if (columns % 2 == 0) columns--;
 	if (rows % 2 == 0) rows--;
-	this.x_span = (element.width - this.cell_size * columns) / 2;
-	this.y_span = (element.height - this.cell_size * rows) / 2;
+	this.x_span = Math.floor((element.width - this.cell_size * columns) / 2);
+	this.y_span = Math.floor((element.height - this.cell_size * rows) / 2);
 	this.rows = (rows -1)/2;
 	this.columns = (columns -1)/2;
 	for (var i = 0; i < rows; i++) {
